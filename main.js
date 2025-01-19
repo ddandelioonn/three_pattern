@@ -2,10 +2,10 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x202020);
+scene.background = new THREE.Color(0x121212);
 
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-camera.position.set(0, 0, 100);
+camera.position.set(0, 50, 150);
 
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
@@ -15,42 +15,44 @@ const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
 controls.dampingFactor = 0.1;
 controls.autoRotate = true;
-controls.autoRotateSpeed = 2;
+controls.autoRotateSpeed = 1;
 controls.update();
 
 const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
 scene.add(ambientLight);
 
 const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-directionalLight.position.set(10, 10, 10);
+directionalLight.position.set(10, 20, 10);
 scene.add(directionalLight);
 
-const geometry = new THREE.SphereGeometry(1, 16, 16);
-const colors = [0xff6347, 0x1e90ff, 0x32cd32, 0xffd700, 0x8a2be2];
+// Создаем кубы в виде 3D-зигзага
+const geometry = new THREE.BoxGeometry(2, 2, 2);
+const colors = [0xf5b7b1, 0xd7bde2, 0xa9cce3, 0xa3e4d7, 0xf9e79f];
 
-// Создаем объекты по спирали
-const radius = 30;
-const heightStep = 1;
-const turns = 10;
-const spheresPerTurn = 20;
+const zigzagWidth = 40;
+const zigzagHeight = 3;
+const zigzagDepth = 5;
+const step = 5;
 
-for (let i = 0; i < turns * spheresPerTurn; i++) {
-    const angle = (i % spheresPerTurn) * (2 * Math.PI / spheresPerTurn);
-    const height = (i / spheresPerTurn) * heightStep;
+for (let i = 0; i < zigzagWidth; i++) {
+    for (let j = 0; j < zigzagHeight; j++) {
+        const color = colors[Math.floor(Math.random() * colors.length)];
+        const material = new THREE.MeshLambertMaterial({ color });
 
-    const material = new THREE.MeshLambertMaterial({
-        color: colors[Math.floor(Math.random() * colors.length)],
-    });
+        const cube = new THREE.Mesh(geometry, material);
+        cube.position.set(
+            i * step - (zigzagWidth * step) / 2,
+            j * step - (zigzagHeight * step) / 2,
+            Math.sin(i * 0.5) * 20 + Math.cos(j * 0.5) * 10
+        );
+        cube.rotation.set(
+            Math.random() * Math.PI,
+            Math.random() * Math.PI,
+            Math.random() * Math.PI
+        );
 
-    const sphere = new THREE.Mesh(geometry, material);
-    sphere.position.set(
-        radius * Math.cos(angle),
-        height,
-        radius * Math.sin(angle)
-    );
-    sphere.scale.set(1.5, 1.5, 1.5);
-
-    scene.add(sphere);
+        scene.add(cube);
+    }
 }
 
 // Анимация
